@@ -7,8 +7,8 @@ Lean = Functional Programming Language + Interactive Proof Assistant
 We start with how to prove a logical statement in Lean using basic tactics
 
 ## term and type in Lean
-In Lean, we manipulate data using 'term' and 'type' of objects.
-We can think of 'type' as a class of objects and 'term' as a data point/element of that type
+In Lean, we manipulate data using `term` and `type` of objects.
+We can think of `type` as a collection of objects and `term` as an object/data point/element of that type
 Let's define some constant
 -/
 
@@ -31,10 +31,11 @@ theorem one_eq_one': P1 := sorry
 #check one_eq_one
 -- one_eq_one has type 1 = 1
 
--- Every true proposition has a proof. In Lean, a proof is represented as a term of the proposition.
--- That is, `P : Prop` means P is a (specfic) proposition
--- and `h : P` means `h` is a proof of `P`.
--- `theorem` tells Lean not to unfold anything inside a proof.
+/-! Every true proposition has a proof. In Lean, a proof is represented as a term of the proposition.
+* `P : Prop` means P is a (specfic) proposition
+* `h : P` means `h` is a proof of `P`.
+-- `theorem` tells Lean to treat every proof as a black-box.
+-/
 
 -- another example
 theorem x_pos (x : ℤ) (h: 1 < x) : 0 ≤ x := sorry
@@ -47,23 +48,21 @@ Given a theorem statement, our objective is to tell Lean the proof by using basi
 This is a game: we start with initial goal given by the theorem and provide a sequence of tactics to close the goal.
 There are ∼ 20 tactics that will be often used. We will introduce new tactics as we go along.
 
-* `rfl` -- reflexive property a = a: the goal can be close because two objects are defitionally equal
+* `rfl` -- reflexive property a = a: the goal can be closed because two objects are defitionally equal
 * `exact` -- the goal can be closed by exactly this hypothesis (i.e., because the goal is definitionally equal to it)
 * `intro` -- reduce a goal of the form `P → Q` to `Q` and obtain `h : P` as a new hypothesis
-          -- reduce a goal of the form `∀ x : N, x > 0` to `x > 0` and obtain `x : ℕ`
-* `apply` -- forward and backward
-* `constructor` -- break `decomposable` goals into subgoals
+          -- i.e., to prove implication, let's assume P and then we prove Q
+* `constructor` -- break down the goals of the form P ∧ Q or P ↔ Q into subgoals
+                -- break P ∧ Q into P and Q separately
+                -- break P ↔ Q into P → Q and Q → P
 -/
 
+section
 -- Throughout this sheet, `P`, `Q` denote propositions.
 variable (P Q: Prop)
 
 example : P = P := rfl
 example : 2 + 1 + 1 = 4 := rfl
-
-example (h: P → Q)(h2: P) : Q := by
-  apply h
-  exact h2
 
 example : P → P := by
   intro h
@@ -78,11 +77,6 @@ example (hP: P) (hQ: Q) : P ∧ Q := by
   exact hP
   exact hQ
 
-example: P ∧ Q ↔ Q ∧ P:= by
-  constructor
-  intro h
-  obtain ⟨hp,hq⟩ := h
-  constructor
-  exact hq
-  exact hp
-  sorry
+example: P ∧ Q ↔ Q ∧ P:= by sorry
+  -- show forward direction
+  -- [TODO] backward direction
