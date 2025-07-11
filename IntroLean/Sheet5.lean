@@ -48,22 +48,64 @@ def getOrElse {α : Type} (opt : MyOption α) (default : α) : α :=
   match opt with
   | MyOption.none   => default
   | MyOption.some x => x
+-- Recursive Inductive Type: Nat
+inductive nat : Type
+| zero
+| succ : nat → nat
 
+-- Examples from Mathmatics in Lean Chapter 6.3 Inductively Defined Types
 -- Recursive Inductive Type: List
-inductive MyList (α : Type)
-| nil : MyList α
-| cons : α → MyList α → MyList α
+namespace MyList
+inductive List (α : Type)
+| nil : List α
+| cons : α → List α → List α
+-- the type List α is either
+-- 1. an empty list (nil) or
+-- 2. cons x xs where x : α and xs : List α
+-- {[], [x], [x₁ x₂], [x₁ x₂ x₃] … }
 
-def emptyList : MyList ℕ := MyList.nil
-def myList1 : MyList ℕ :=  MyList.cons 1 emptyList
-def myList21 :  MyList ℕ := MyList.cons 2 myList1
+#check List
+#check List.nil
+#check List.cons
 
-def listLength {α : Type} : MyList α → Nat
-| MyList.nil          => 0
-| MyList.cons _ tail  => 1 + listLength tail
+end MyList
 
-def listSum : MyList Nat → Nat
-| MyList.nil          => 0
-| MyList.cons x xs    => x + listSum xs
+-- Lean defines the notation [] for nil and :: for cons,
+-- [a,b,c] = a :: b :: c :: []
 
--- Tactics for inductive types
+def append {α : Type} : List α → List α → List α
+| [], bs => bs
+| a :: as, bs => a :: (append as bs)
+
+#check append
+#eval append [1, 2, 3] [4, 5, 6]
+-- append has notation ++
+
+-- Exercise: write reverse list
+def reverse {α : Type} : List α → List α
+| [] => []
+| a :: xs => reverse xs ++ [a]
+
+#eval reverse [1,2,3]
+
+-- Exercise: compute the length of a list
+def len {α : Type} : List α → ℕ
+| []     =>  0
+| _ :: xs => 1 + len xs
+
+#check len
+
+-- proving by induction
+theorem len_append (x : ℕ) (l : List ℕ) : len (l ++ [x]) = 1 + len l  := by
+  induction' l with y ys
+  aesop
+  simp only [List.cons_append, len]
+  rw [tail_ih]
+
+theorem len_eq_len_rev (xs: List ℕ): len xs = len (reverse xs) := by
+  induction' xs with x xs
+  simp_all [len,reverse]
+  simp [len,reverse]
+  have: len (reverse xs ++ [x]) = 1+ len (reverse xs) := by
+    apply len_append
+  rw [this,tail_ih]
